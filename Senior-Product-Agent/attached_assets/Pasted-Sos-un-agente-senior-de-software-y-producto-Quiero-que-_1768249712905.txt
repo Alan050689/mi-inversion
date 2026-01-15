@@ -1,0 +1,111 @@
+Sos un agente senior de software y producto. Quiero que crees una app web MUY SIMPLE (MVP) para llevar el registro de mis aportes a un proyecto inmobiliario. Tiene que correr en Replit FREE y deployar en Vercel FREE sin costos.
+
+OBJETIVO
+- App mínima, rápida, sin dependencias raras, sin DB externa.
+- Persistencia local con archivo JSON (para no usar Supabase/Firebase).
+- UI simple para cargar aportes y ver totales.
+- Preparada para luego subir a GitHub y deployar en Vercel.
+
+STACK OBLIGATORIO
+- Next.js (App Router) + TypeScript
+- Sin base de datos externa.
+- Persistencia: archivo local JSON usando el filesystem en el server (API routes).
+- Estilos: CSS simple (sin Tailwind, sin UI kits).
+- Evitar heavy tooling. Nada de Prisma, Supabase, Auth, etc.
+
+FUNCIONALIDADES MVP
+1) Página principal “Dashboard”
+   - Título: “Mi Inversión”
+   - Resumen con:
+     - Total aportado en USD
+     - Total aportado en ARS
+     - Lista de movimientos (ordenados por fecha desc)
+
+2) Movimientos (CRUD básico)
+   - Un movimiento tiene:
+     - id (uuid)
+     - date (YYYY-MM-DD)
+     - type: "APORTE" | "COBRO"
+     - currency: "USD" | "ARS"
+     - amount (number)
+     - note (string opcional)
+     - fxType (solo si currency = ARS): "BLUE" | "OFICIAL" | "MANUAL"
+     - fxRate (solo si fxType = MANUAL): number
+     - usdEquivalent (calculado y guardado si currency=ARS)
+   - Formularios:
+     - Agregar movimiento
+     - Eliminar movimiento
+     - (Opcional si es rápido) Editar movimiento
+
+3) Tipo de cambio (simple y robusto)
+   - Si currency=ARS:
+     - Permitir elegir fxType: BLUE / OFICIAL / MANUAL
+     - Si BLUE u OFICIAL:
+       - Traer tipo de cambio desde una API pública (la que elijas) con fetch server-side.
+       - Guardar el valor usado en el movimiento (para que no cambie en el tiempo).
+     - Si MANUAL:
+       - Usuario escribe fxRate (ARS por USD)
+   - Mostrar USD equivalente = amount_ars / fxRate
+
+4) Comparación con SP500 (simple, sin data compleja)
+   - Permitir setear un “Benchmark anual %” editable (por default 10%).
+   - Calcular “valor hipotético hoy” por cada aporte USD:
+     - Usar interés compuesto desde la fecha del aporte hasta hoy:
+       value = aporteUSD * (1 + r)^(días/365)
+   - Mostrar:
+     - Total invertido USD
+     - Valor hipotético S&P (aprox) USD
+     - Diferencia
+
+IMPORTANTE (para no romper en Vercel)
+- La persistencia por archivo JSON sirve para MVP en Replit, pero en Vercel el filesystem es efímero.
+- Aun así, quiero que el proyecto compile y funcione en Vercel:
+  - Implementar una capa de storage con interfaz:
+    - storage/fileStorage.ts (default en Replit)
+    - storage/memoryStorage.ts (fallback si FS no es escribible)
+  - Detectar si se puede escribir en /tmp (Vercel) y usar /tmp/data.json si es posible.
+  - Si no, usar memoryStorage y avisar en UI: “Modo demo: datos no persistentes”.
+
+ESTRUCTURA DE CARPETAS
+- app/page.tsx (Dashboard + formulario + lista)
+- app/api/transactions/route.ts (GET/POST)
+- app/api/transactions/[id]/route.ts (DELETE y PUT si editas)
+- lib/types.ts
+- lib/fx.ts (fetch tipo de cambio)
+- lib/benchmark.ts (cálculo compuesto)
+- storage/storage.ts (interface + selector)
+- storage/fileStorage.ts
+- storage/memoryStorage.ts
+- data/data.json (si aplica para Replit)
+
+PASOS QUE TENÉS QUE EJECUTAR
+A) Inicializar proyecto Next.js en Replit (TypeScript).
+B) Implementar API routes para leer/escribir transacciones.
+C) Implementar UI con:
+   - Formulario
+   - Tabla/lista
+   - Totales
+   - Sección benchmark
+D) Probar en Replit: crear, listar, borrar.
+E) Dejar instrucciones claras en README.md para:
+   - Correr local
+   - Subir a GitHub
+   - Deploy en Vercel (import repo, build command, env vars si hubiera, etc.)
+
+ENTREGABLES
+1) El código completo funcionando.
+2) README.md con pasos exactos:
+   - “Create GitHub repo”
+   - “Push from Replit to GitHub”
+   - “Import to Vercel”
+3) Al final, decime:
+   - URL local de Replit para ver la app
+   - Qué endpoints hay
+   - Qué limitaciones tiene el modo Vercel (filesystem)
+
+REGLAS DE CALIDAD
+- Nada de features extra fuera del MVP.
+- Todo en español en la UI.
+- Manejar errores (API down, fx no disponible) con fallback a MANUAL.
+- Mantenerlo muy liviano y simple.
+Empezá ahora y no hagas preguntas: asumí defaults razonables.

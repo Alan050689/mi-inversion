@@ -1,0 +1,16 @@
+{
+  "transactions": [
+    {
+      "date": "2025-01-15",
+      "type": "APORTE",
+      "currency": "USD",
+      "amount": 120000,
+      "note": "Primer aporte al proyecto",
+      "id": "e05f5de7-549b-4a56-bb9e-cefee9544a68"
+    }
+  ],
+  "settings": {
+    "benchmarkRate": 10,
+    "selectedBenchmark": "sp500"
+  }
+}
